@@ -174,6 +174,10 @@ class condition extends \core_availability\condition {
 
         $option = $DB->get_record('choicepath_options', ['id' => $this->optionid], 'id, title', MUST_EXIST);
 
+        if ($not) {
+            return get_string('availability_description_not', 'availability_path', $option->title);
+        }
+
         return get_string('availability_description', 'availability_path', $option->title);
     }
 

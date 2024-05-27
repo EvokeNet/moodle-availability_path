@@ -34,4 +34,5 @@ $string['label_option'] = 'Path option';
 $string['error_selectcmid'] = 'You must select an activity.';
 $string['error_selectoptionid'] = 'You must select an option.';
 
-$string['availability_description'] = 'You need to choose <strong>{$a}</strong>';
+$string['availability_description'] = 'You choose <strong>{$a}</strong>';
+$string['availability_description_not'] = 'You <strong>do not</strong> choose <strong>{$a}</strong>';
