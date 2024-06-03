@@ -42,7 +42,6 @@ require_once($CFG->libdir . '/completionlib.php');
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class condition extends \core_availability\condition {
-
     /** @var int ID of module that this depends on */
     protected $cmid;
 
@@ -199,5 +198,59 @@ class condition extends \core_availability\condition {
      */
     public static function wipe_static_cache() {
         self::$modsusedincondition = [];
+    }
+
+    /**
+     * Updates this node after restore, returning true if anything changed.
+     *
+     * @see \core_availability\tree_node\update_after_restore
+     *
+     * @param string $restoreid Restore ID
+     * @param int $courseid ID of target course
+     * @param \base_logger $logger Logger for any warnings
+     * @param string $name Name of this item (for use in warning messages)
+     * @return bool True if there was any change
+     */
+    public function update_after_restore($restoreid, $courseid, \base_logger $logger, $name): bool {
+        global $DB;
+
+        $rec = \restore_dbops::get_backup_ids_record($restoreid, 'course_module', $this->cmid);
+
+        if (!$rec || !$rec->newitemid) {
+            // If we are on the same course (e.g. duplicate) then we can just
+            // use the existing one.
+            if ($DB->record_exists('course_modules',
+                ['id' => $this->cmid, 'course' => $courseid])) {
+                return false;
+            }
+
+            // Otherwise it's a warning.
+            $this->cmid = 0;
+            $this->optionid = 0;
+            $logger->process('Restored item (' . $name .
+                ') has availability condition on module that was not restored',
+                \backup::LOG_WARNING);
+        } else {
+            $this->cmid = (int)$rec->newitemid;
+            $this->optionid = 0;
+
+            $cm = get_coursemodule_from_id('choicepath', $this->cmid, 0, false, MUST_EXIST);
+            $moduleinstance = $DB->get_record('choicepath', ['id' => $cm->instance], '*', MUST_EXIST);
+
+            $sql = 'SELECT * FROM {choicepath_options} WHERE choicepathid = :choicepathid AND ' . $DB->sql_like('title', ':title', false, false);
+
+            $params = [
+                'choicepathid' => $moduleinstance->id,
+                'title' => '%'.trim($name).'%'
+            ];
+
+            $option = $DB->get_record_sql($sql, $params);
+
+            if ($option) {
+                $this->optionid = (int)$option->id;
+            }
+        }
+
+        return true;
     }
 }
