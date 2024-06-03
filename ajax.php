@@ -35,7 +35,7 @@ require_login($course, false, $cm);
 $context = core\context\module::instance($cm->id);
 require_capability('mod/choicepath:addinstance', $context);
 
-$records = $DB->get_records('choicepath_options', ['choicepathid' => $cmid]);
+$records = $DB->get_records('choicepath_options', ['choicepathid' => $moduleinstance->id]);
 
 if (!$records) {
     echo json_encode([]);

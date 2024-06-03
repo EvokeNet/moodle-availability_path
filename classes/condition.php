@@ -150,7 +150,10 @@ class condition extends \core_availability\condition {
     protected function get_user_answer($userid) {
         global $DB;
 
-        $answer = $DB->get_record('choicepath_answers', ['userid' => $userid, 'choicepathid' => $this->cmid]);
+        $cm = get_coursemodule_from_id('choicepath', $this->cmid, 0, false, MUST_EXIST);
+        $moduleinstance = $DB->get_record('choicepath', ['id' => $cm->instance], '*', MUST_EXIST);
+
+        $answer = $DB->get_record('choicepath_answers', ['userid' => $userid, 'choicepathid' => $moduleinstance->id]);
 
         if (!$answer) {
             return false;

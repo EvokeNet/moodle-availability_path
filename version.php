@@ -26,6 +26,9 @@ defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'availability_path';
 $plugin->release = '1.0.0';
-$plugin->version = 2024052500;
+$plugin->version = 2024060100;
 $plugin->requires = 2022112800;
 $plugin->maturity = MATURITY_STABLE;
+$plugin->dependencies = [
+    'mod_choicepath' => 2024060100
+];
